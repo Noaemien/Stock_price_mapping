@@ -48,21 +48,21 @@ class Neural_Network:
     def activation(self, Z, layer):
         if self.params["Act" + layer] == "RELU":
             out = np.maximum(0, Z)
-
+        elif self.params["Act" + layer] == "LINEAR":
+            return Z
         return out
     #
     # TO DO
     #
     def d_activation(self, A, layer):
         if self.params["Act" + layer] == "RELU":
-            if int(layer) == self.layer_nbr:
-                drelu = self.forward_cache["Z" + layer] > 0 #Wrong, needs to be corrected
+            if int(layer) != 0:
+                drelu = self.forward_cache["Z" + layer] > 0 
                 out = A * drelu 
-            elif layer != "1":
-                drelu = self.forward_cache["Z" + str(int(layer) - 1)]
-                out = A * drelu 
-            else: out = 0
-            
+            #else: 
+            #   out = 0
+        #elif:
+
         return out
     
     
@@ -96,37 +96,47 @@ class Neural_Network:
         d_cost = self.get_d_cost()
         for i in reversed(range(self.layer_nbr)):
             layer = str(i + 1)
-            print(layer)
             if i + 1 == self.layer_nbr:
                 self.backward_cache["dZ" + layer] = self.d_activation(d_cost, layer)
                 assert(np.shape(self.backward_cache["dZ" + layer]) == np.shape(self.forward_cache["Z" + layer]))
                 
                 self.backward_cache["dW" + layer] = self.backward_cache["dZ" + layer].dot(self.forward_cache["A" + str(i)].T)
                 assert(np.shape(self.backward_cache["dW" + layer]) == np.shape(self.params["W" + layer]))
+
+                self.backward_cache["db" + layer] = np.sum(self.backward_cache["dZ" + layer], axis = 1, keepdims = True)
+                assert(np.shape(self.backward_cache["db" + layer]) == np.shape(self.params["b" + layer]))
                 
-                
-                self.backward_cache["dZ" + str(i)] = self.d_activation(self.params["W" + layer].T.dot(self.forward_cache["dZ" + layer]), layer) #Not working yet
+                self.backward_cache["dZ" + str(i)] = self.d_activation(self.params["W" + layer].T.dot(self.backward_cache["dZ" + layer]), str(i))
                 assert(np.shape(self.backward_cache["dZ" + str(i)]) == np.shape(self.forward_cache["Z" + str(i)]))
                 
             else:
-                #self.backward_cache["dZ" + layer] = self.d_activation(self.params["W" + layer].T.dot(self.forward_cache["dZ" + str(int(layer) + 1)]), layer) #Not working yet
                 
-                print(np.shape(self.params["W" + layer]), np.shape(self.forward_cache["Z" + layer]))
-                #print(np.shape(self.backward_cache["dZ" + layer]), np.shape(self.forward_cache["Z" + layer]))
                 
-                #assert(np.shape(self.backward_cache["dZ" + layer]) == np.shape(self.forward_cache["Z" + layer]))
+                self.backward_cache["db" + layer] = np.sum(self.backward_cache["dZ" + layer], axis = 1, keepdims = True)
+                assert(np.shape(self.backward_cache["db" + layer]) == np.shape(self.params["b" + layer]))
+
+                if layer != "1":
+                    self.backward_cache["dW" + layer] = self.backward_cache["dZ" + layer].dot(self.forward_cache["A" + str(i)].T)
+                    assert(np.shape(self.backward_cache["dW" + layer]) == np.shape(self.params["W" + layer])) 
+
+                    self.backward_cache["dZ" + str(i)] = self.d_activation(self.params["W" + layer].T.dot(self.backward_cache["dZ" + layer]), str(i))
+                    assert(np.shape(self.backward_cache["dZ" + str(i)]) == np.shape(self.forward_cache["Z" + str(i)]))
+                else:
+                    self.backward_cache["dW" + layer] = self.backward_cache["dZ" + layer].dot(self.X.T)
+                    assert(np.shape(self.backward_cache["dW" + layer]) == np.shape(self.params["W" + layer]))  
+                
                 
                 
                 
                 
                 
 
-X = np.random.uniform(0, 1, (10, 100))
-Y = np.random.uniform(0, 1, (10, 100))
+X = np.random.uniform(0, 1, (10, 10000))
+Y = np.random.uniform(0, 1, (10, 10000))
 
 nn = Neural_Network(X, Y, [512, 515, 511, 513, 10])
 
-for i in range(100):
+for i in range(10):
     nn.forward()
     nn.backward()
 
