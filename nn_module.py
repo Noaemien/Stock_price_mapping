@@ -171,13 +171,13 @@ class Neural_Network:
                 
                 
                 
-
+'''
 X = np.random.uniform(-1, 5, (1, 500))
 Y = X ** 2
 
 nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
 nn.train(0.001, 5000)
-'''
+
 for i in range(10):
     nn.forward()
     nn.backward()
