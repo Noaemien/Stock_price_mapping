@@ -16,6 +16,7 @@ class Neural_Network:
         end_activation = end_activation.upper()
         hidden_activation = hidden_activation.upper()
         self.optimisation_function = optimisation_function.upper()
+        self.cost_function = cost_function.upper()
 
         #Initialise parameters
         for i in range(self.layer_nbr):
@@ -23,8 +24,8 @@ class Neural_Network:
 
             #Initialise parameters of first layer.
             if layer == "1":
-                self.params["W1"] =  np.random.rand(layer_neurons[i], self.features) - 0.5
-                self.params["b1"] = np.random.rand(layer_neurons[i], 1) - 0.5
+                self.params["W1"] =  np.random.uniform(-1, 1, (layer_neurons[i], self.features))
+                self.params["b1"] = np.random.uniform(-1, 1, (layer_neurons[i], 1))
 
                 #Set activation of first layer to end activation if number of layers is equals to 1
                 if len(layer_neurons) == 1:
@@ -35,8 +36,8 @@ class Neural_Network:
                 continue
                 
             #Initialise parameters of other layers.
-            self.params["W" + layer] =  np.random.rand(layer_neurons[i], layer_neurons[i - 1]) - 0.5
-            self.params["b" + layer] = np.random.rand(layer_neurons[i], 1) - 0.5
+            self.params["W" + layer] =  np.random.uniform(-1, 1, (layer_neurons[i], layer_neurons[i - 1])) * np.sqrt(2/layer_neurons[i - 1])
+            self.params["b" + layer] = np.random.uniform(-1, 1, (layer_neurons[i], 1)) * np.sqrt(2/layer_neurons[i - 1])
 
             if self.layer_nbr == i + 1:
                 self.params["Act" + layer] = end_activation
@@ -48,7 +49,7 @@ class Neural_Network:
     #
     def activation(self, Z, layer):
         if self.params["Act" + layer] == "RELU":
-            out = np.maximum(0, Z)
+            out = np.maximum(0.01 * Z, Z)
         elif self.params["Act" + layer] == "LINEAR":
             return Z
         return out
@@ -58,18 +59,26 @@ class Neural_Network:
     def d_activation(self, A, layer):
         layer_act = self.params["Act" + layer]
         if layer_act == "RELU":
-            drelu = self.forward_cache["Z" + layer] > 0 
+            drelu = self.forward_cache["Z" + layer] > 0
             out = A * drelu 
         elif layer_act == "LINEAR":
             return A
 
         return out
     
-    
+    def get_cost(self):
+        m = len(self.Y[0])
+        if self.cost_function == "MSE":
+            return (1/m) * np.sum((self.preds - self.Y) ** 2)
     #
     # TO DO
     #
     def get_d_cost(self):
+        if self.cost_function == "MSE":
+            return 2 * (self.preds - self.Y)
+
+        elif self.cost_function == "LOG":
+            pass
         return self.Y
     
     
@@ -88,6 +97,9 @@ class Neural_Network:
             #Forward pass with n_st layer: Z_n = W_n * A_n-1 + b_n
             self.forward_cache["Z" + layer] = self.params["W" + layer].dot(self.forward_cache["A" + str(i)]) + self.params["b" + layer] 
             self.forward_cache["A" + layer] = self.activation(self.forward_cache["Z" + layer], layer) #Activation function
+
+            if int(layer) == self.layer_nbr:
+                self.preds = self.forward_cache["A" + layer] 
     #
     # WORKING
     #       
@@ -145,22 +157,30 @@ class Neural_Network:
     # TO DO
     #
     def train(self, alpha, epochs):
-        pass
+        for i in range(epochs):
+            self.forward()
+            self.backward()
+            self.grad_descent(alpha)
+            if i % 100 == 0:
+                print(self.get_cost())
+                print(self.preds[0][0:2],self.Y[0][0:2])
+        print(self.preds[0][0:10])
+        print(self.Y[0][0:10])
         
                 
                 
                 
                 
 
-X = np.random.uniform(0, 1, (10, 100))
-Y = np.random.uniform(0, 1, (10, 100))
+X = np.random.uniform(-1, 5, (1, 500))
+Y = X ** 2
 
-nn = Neural_Network(X, Y, [512, 515, 511, 513, 10], optimisation_function="GRADIENTDESCENT")
-
+nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
+nn.train(0.001, 5000)
+'''
 for i in range(10):
     nn.forward()
     nn.backward()
     nn.grad_descent(0.01)
 
-
-
+'''
