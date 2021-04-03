@@ -161,7 +161,7 @@ class Neural_Network:
             self.forward()
             self.backward()
             self.grad_descent(alpha)
-            if i % 100 == 0:
+            if i % 10 == 0:
                 print(self.get_cost())
                 print(self.preds[0][0:2],self.Y[0][0:2])
         print(self.preds[0][0:10])
