@@ -154,33 +154,29 @@ class Neural_Network:
 
 
     #
-    # TO DO
+    # WORKING
     #
     def train(self, alpha, epochs):
         for i in range(epochs):
             self.forward()
             self.backward()
-            self.grad_descent(alpha)
-            if i % 10 == 0:
+            self.optimisation(alpha)
+            if i % 100 == 0:
                 print(self.get_cost())
                 print(self.preds[0][0:2],self.Y[0][0:2])
         print(self.preds[0][0:10])
         print(self.Y[0][0:10])
+        return self.get_cost()
         
                 
                 
                 
                 
-'''
-X = np.random.uniform(-1, 5, (1, 500))
-Y = X ** 2
+if __name__ == "__main__":
+    X = np.random.uniform(-1, 5, (1, 500))
+    Y = X ** 2
 
-nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
-nn.train(0.001, 5000)
+    nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
+    nn.train(0.001, 5000)
 
-for i in range(10):
-    nn.forward()
-    nn.backward()
-    nn.grad_descent(0.01)
 
-'''

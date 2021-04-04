@@ -14,12 +14,22 @@ Y = X ** 2
 
 nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
 
-#Gets called from main.js after a click of the "test" button
-@app.route("/test")
-def testfn():
-    print("Success !")
-    nn.train(0.001, 50)
-    return render_template("nn_training.html", cost=str(0.1))
+#Gets called from main.js after a click of the "run" button
+@app.route("/nn_iteration/<float:alpha>")
+def nn_iteration(alpha):
+    #print("Success !")
+    #print(alpha)
+    cost = nn.train(alpha, 1)
+    return jsonify(cost)
+
+
+#Resets weights and biases when called from main.js
+@app.route("/init_params", methods = ["GET"])
+def init_params():
+    global nn
+    nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
+    print("Re-initialising !")
+    return "None"
 
 
 if __name__ == "__main__":
