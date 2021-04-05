@@ -8,7 +8,7 @@ app = Flask(__name__)
 def nn_training():
     return render_template("nn_training.html")
 
-X = np.random.uniform(-1, 5, (1, 500))
+X = np.random.uniform(-1, 5, (1, 5000))
 Y = X ** 2
 
 nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
@@ -25,11 +25,18 @@ def nn_iteration(alpha):
 
 
 #Resets weights and biases when called from main.js
-@app.route("/init_params", methods = ["GET"])
+@app.route("/init_params", methods = ["POST"])
 def init_params():
     global nn
-    nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
-    print("Re-initialising !")
+    
+    #Get data from post in "main.js"
+    optimisation_f = request.form["optimisation_function"].upper()
+    hidden_a = request.form["hidden_activation"].upper()
+    out_a = request.form["out_activation"].upper()
+    layer_n = json.loads(request.form["layer_neurons"])
+
+    nn = Neural_Network(X, Y, layer_neurons=layer_n, optimisation_function=optimisation_f,hidden_activation=hidden_a, end_activation=out_a)
+    print(optimisation_f, hidden_a, out_a, layer_n)
     return "None"
 
 

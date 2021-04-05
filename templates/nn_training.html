@@ -14,13 +14,61 @@
         <label for="iterations">Number of iterations: </label>
         <input type="number" id="iterations" min="0" value="10" />
         <div id="hp_tuning">
-            <!-- Learning rate alpha input box-->
+            
+            <span><u> Settings: </u> </span>
+            <input type="button" id="toggle_advanced_settings" value="Advanced settings" onclick="ToggleSettings()"/>
+            
+            <!-- Learning rate alpha input box -->
             <label for="alpha_input">Learning rate (alpha): </label>
             <input type="number" id="alpha_input" min = "0" step="0.00000001" value="0.01">
+            <div class="basic_settings">
+                
+                
+                <!-- Optimisation function drop down menu -->
+                <label for="optimisation_function">Optimisation function: </label>
+                <select name="optimisation_function" id="optimisation_function">
+                    <option value="adam">Adam</option>        
+                    <option value="gradientdescent">Gradient descent</option>
+                </select>
+
+                <!-- Hidden layer activation functions drop down menu -->
+                <label for="hidden_activation">Hidden layer activation function: </label>
+                <select name="hidden_activation" id="hidden_activation">
+                    <option value="linear">Linear</option>        
+                    <option value="relu">ReLU</option>
+                    <option value="tanh">Tanh</option>
+                    <option value="sigmoid">Sigmoid</option>
+                    <option value="softmax">Softmax</option>
+                </select>
+
+                <!-- Output layer activation functions drop down menu -->
+                <label for="out_activation">Output layer activation function: </label>
+                <select name="out_activation" id="out_activation">
+                    <option value="linear">Linear</option>        
+                    <option value="relu">ReLU</option>
+                    <option value="tanh">Tanh</option>
+                    <option value="sigmoid">Sigmoid</option>
+                    <option value="softmax">Softmax</option>
+                </select>
+            </div>
+
+            <div>
+                <input type="button" id="add_layer_button" value="Add layer" onclick="AddLayer()" />
+
+                <label for="layer_nbr">Number of layers: </label>
+                <input type="number" id="layer_nbr" value="0"/>
+
+                <input type="button" id="del_layer_button" value="Remove layer" onclick="RemoveLayer()" />
+            </div>
+            <div id="layers">
+
+                
+            </div>
+
         </div>
         <div id="py_console">
             <label for="cost">Cost: </label>
-            <p id="cost">0</p>
+            <span id="cost">0</span>
         </div>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>

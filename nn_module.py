@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Neural_Network:
-    def __init__(self, X, Y, layer_neurons = [10, 10], hidden_activation = "RELU", end_activation = "RELU", optimisation_function = "ADAM", cost_function = "MSE"):
+    def __init__(self, X, Y, layer_neurons = [10, 10], hidden_activation = "RELU", end_activation = "LINEAR", optimisation_function = "ADAM", cost_function = "MSE"):
 
         self.params = {}
         self.layer_nbr = len(layer_neurons)
@@ -113,7 +113,7 @@ class Neural_Network:
                 self.backward_cache["dZ" + layer] = self.d_activation(d_cost, layer)
                 assert(np.shape(self.backward_cache["dZ" + layer]) == np.shape(self.forward_cache["Z" + layer]))
                 
-                self.backward_cache["dW" + layer] = (1/m) * self.backward_cache["dZ" + layer].dot(self.forward_cache["A" + str(i)].T)
+                self.backward_cache["dW" + layer] = (1/m) * (self.backward_cache["dZ" + layer].dot(self.forward_cache["A" + str(i)].T))
                 assert(np.shape(self.backward_cache["dW" + layer]) == np.shape(self.params["W" + layer]))
 
                 self.backward_cache["db" + layer] = (1/m) * np.sum(self.backward_cache["dZ" + layer], axis = 1, keepdims = True)
@@ -129,13 +129,13 @@ class Neural_Network:
                 assert(np.shape(self.backward_cache["db" + layer]) == np.shape(self.params["b" + layer]))
 
                 if layer != "1":
-                    self.backward_cache["dW" + layer] = (1/m) * self.backward_cache["dZ" + layer].dot(self.forward_cache["A" + str(i)].T)
+                    self.backward_cache["dW" + layer] = (1/m) * (self.backward_cache["dZ" + layer].dot(self.forward_cache["A" + str(i)].T))
                     assert(np.shape(self.backward_cache["dW" + layer]) == np.shape(self.params["W" + layer])) 
 
                     self.backward_cache["dZ" + str(i)] = self.d_activation(self.params["W" + layer].T.dot(self.backward_cache["dZ" + layer]), str(i))
                     assert(np.shape(self.backward_cache["dZ" + str(i)]) == np.shape(self.forward_cache["Z" + str(i)]))
                 else:
-                    self.backward_cache["dW" + layer] = (1/m) * self.backward_cache["dZ" + layer].dot(self.X.T)
+                    self.backward_cache["dW" + layer] = (1/m) * (self.backward_cache["dZ" + layer].dot(self.X.T))
                     assert(np.shape(self.backward_cache["dW" + layer]) == np.shape(self.params["W" + layer]))  
     
     def grad_descent(self, alpha):
@@ -149,6 +149,7 @@ class Neural_Network:
         if self.optimisation_function == "GRADIENTDESCENT":
             self.grad_descent(alpha)
         elif self.optimisation_function == "ADAM":
+            print("Ye")
             pass
             #self.adam()
 
@@ -162,10 +163,11 @@ class Neural_Network:
             self.backward()
             self.optimisation(alpha)
             if i % 100 == 0:
-                print(self.get_cost())
-                print(self.preds[0][0:2],self.Y[0][0:2])
-        print(self.preds[0][0:10])
-        print(self.Y[0][0:10])
+                pass
+                #print(self.get_cost())
+                #print(self.preds[0][0:2],self.Y[0][0:2])
+        #print(self.preds[0][0:10])
+        #print(self.Y[0][0:10])
         return self.get_cost()
         
                 
