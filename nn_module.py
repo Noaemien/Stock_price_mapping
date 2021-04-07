@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Neural_Network:
-    def __init__(self, X, Y, layer_neurons = [10, 10], hidden_activation = "RELU", end_activation = "LINEAR", optimisation_function = "ADAM", cost_function = "MSE"):
+    def __init__(self, X, Y, layer_neurons = [10, 10], layer_activations = ["RELU", "LINEAR"], optimisation_function = "ADAM", cost_function = "MSE"):
 
         self.params = {}
         self.layer_nbr = len(layer_neurons)
@@ -12,9 +12,6 @@ class Neural_Network:
         self.X = X
         self.Y = Y
         
-
-        end_activation = end_activation.upper()
-        hidden_activation = hidden_activation.upper()
         self.optimisation_function = optimisation_function.upper()
         self.cost_function = cost_function.upper()
 
@@ -27,11 +24,7 @@ class Neural_Network:
                 self.params["W1"] =  np.random.uniform(-1, 1, (layer_neurons[i], self.features))
                 self.params["b1"] = np.random.uniform(-1, 1, (layer_neurons[i], 1))
 
-                #Set activation of first layer to end activation if number of layers is equals to 1
-                if len(layer_neurons) == 1:
-                    self.params["Act1"] = end_activation
-                else:
-                    self.params["Act1"] = hidden_activation
+                self.params["Act1"] = layer_activations[i].upper()
 
                 continue
                 
@@ -39,20 +32,42 @@ class Neural_Network:
             self.params["W" + layer] =  np.random.uniform(-1, 1, (layer_neurons[i], layer_neurons[i - 1])) * np.sqrt(2/layer_neurons[i - 1])
             self.params["b" + layer] = np.random.uniform(-1, 1, (layer_neurons[i], 1)) * np.sqrt(2/layer_neurons[i - 1])
 
-            if self.layer_nbr == i + 1:
-                self.params["Act" + layer] = end_activation
-            else:
-                self.params["Act" + layer] = hidden_activation
+            self.params["Act" + layer] = layer_activations[i].upper()
+        
+        self.init_optimisation()
+
+
+
+    def init_optimisation(self):
+        if self.optimisation_function == "GRADIENTDESCENT":
+            pass
+        elif self.optimisation_function == "ADAM":
+            self.init_adam()
+            
+
+    
+
+    def init_adam(self):
+        self.V = {}
+        
+        for i in range(self.layer_nbr):
+            layer = str(i + 1)
+            self.V["dW" + layer] = np.zeros(np.shape(self.params["W" + layer]))
+            self.V["db" + layer] = np.zeros(np.shape(self.params["b" + layer]))
+
+        self.S = self.V.copy()
+
+        
 
     #
     # TO DO
     #
     def activation(self, Z, layer):
         if self.params["Act" + layer] == "RELU":
-            out = np.maximum(0.01 * Z, Z)
+            return np.maximum(0, Z)
         elif self.params["Act" + layer] == "LINEAR":
             return Z
-        return out
+        return 1
     #
     # TO DO
     #
@@ -144,30 +159,43 @@ class Neural_Network:
             self.params["W" + layer] -= alpha * self.backward_cache["dW" + layer]
             self.params["b" + layer] -= alpha * self.backward_cache["db" + layer]
             
+    def adam(self, alpha, beta1, beta2, it):
+        epsilon = 1e-8
+        for i in range(self.layer_nbr):
+            layer = str(i + 1)
+            self.V["dW" + layer] = beta1 * self.V["dW" + layer] + (1 - beta1) * self.backward_cache["dW" + layer]
+            self.V["db" + layer] = beta1 * self.V["db" + layer] + (1 - beta1) * self.backward_cache["db" + layer]
+            self.S["dW" + layer] = beta2 * self.S["dW" + layer] + (1 - beta2) * self.backward_cache["dW" + layer] **2
+            self.S["db" + layer] = beta2 * self.S["db" + layer] + (1 - beta2) * self.backward_cache["db" + layer] **2
 
-    def optimisation(self, alpha):
+            VdW_c = self.V["dW" + layer]/(1 - beta1 ** it)
+            SdW_c = self.S["dW" + layer]/(1 - beta2 ** it)  
+            Vdb_c = self.V["db" + layer]/(1 - beta1 ** it)
+            Sdb_c = self.S["db" + layer]/(1 - beta2 ** it)  
+
+
+            self.params["W" + layer] -= alpha * (VdW_c/(np.sqrt(SdW_c) + epsilon))
+            self.params["b" + layer] -= alpha * (Vdb_c/(np.sqrt(Sdb_c) + epsilon))
+
+
+    def optimisation(self, alpha, beta1, beta2, it):
         if self.optimisation_function == "GRADIENTDESCENT":
             self.grad_descent(alpha)
         elif self.optimisation_function == "ADAM":
-            print("Ye")
+            self.adam(alpha, beta1, beta2, it)
+        elif self.optimisation_function == "MOMENTUM":
             pass
-            #self.adam()
+        elif self.optimisation_function == "RMSPROP":
+            pass
 
 
     #
     # WORKING
     #
-    def train(self, alpha, epochs):
-        for i in range(epochs):
-            self.forward()
-            self.backward()
-            self.optimisation(alpha)
-            if i % 100 == 0:
-                pass
-                #print(self.get_cost())
-                #print(self.preds[0][0:2],self.Y[0][0:2])
-        #print(self.preds[0][0:10])
-        #print(self.Y[0][0:10])
+    def train(self, alpha, it, beta1 = 0.9, beta2 = 0.999):
+        self.forward()
+        self.backward()
+        self.optimisation(alpha, beta1, beta2, it)
         return self.get_cost()
         
                 
@@ -179,6 +207,6 @@ if __name__ == "__main__":
     Y = X ** 2
 
     nn = Neural_Network(X, Y, [128, 128, 1], optimisation_function="GRADIENTDESCENT")
-    nn.train(0.001, 5000)
+    nn.train(0.001, 1)
 
 

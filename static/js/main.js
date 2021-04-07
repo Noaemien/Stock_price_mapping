@@ -1,21 +1,41 @@
 var stop = false;
+
+var it = 1; //Count total amount of iterations since reset
 //triggers the function linked to "/nn_iteration/<float:alpha>" when button "run_button" is pressed.
 $(function() {
     $('#run_button').on('click', function(e) {
       var link = "/nn_iteration/" + document.getElementById("alpha_input").value.toString();
-      var iterations = document.getElementById("iterations").value; 
-      var it = 0;
+      var iterations = $("#iterations").val(); 
+      var run_it = 0; //count number of iterations in this run
       stop = false;
       e.preventDefault();
+      var beta1 = 0.9;
+      var beta2 = 0.999;
       function nn_iteration(){
-        if (it < iterations && stop == false){
+        if (run_it < iterations && stop == false){
+          var alpha = $("#alpha_input").val().toString();
+
+          $.post("/nn_iteration",{
+            alpha: alpha,
+            iteration: it.toString(),
+            beta1: beta1.toString(),
+            beta2: beta2.toString()
+          }, function(data) {
+              it++;
+              run_it++;
+              nn_iteration();    //Loop structured as a callback so that the neural network iteration in the app.py file has the time to finish.
+              var cost = $.parseJSON(data); //retrieve json sent by the nn_iteration function in app.py
+              $("#cost").html(cost.toString());
+        });
+          
+          /*
           $.getJSON(link,          //run nn_iteration function in app.py
               function(data) {
                 it++;
                 nn_iteration();    //Loop structured as a callback so that the neural network iteration in the app.py file has the time to finish.
                 var cost = $.parseJSON(data); //retrieve json sent by the nn_iteration function in app.py
-                document.getElementById("cost").innerHTML = cost.toString();
-          });
+                $("#cost").attr("innerHTML", cost.toString());
+          });*/
         } else if(stop == true){
           stop == false;
         }
@@ -24,8 +44,18 @@ $(function() {
       return false;
     });
   });
+//
+//
+//
+// TO DO
+//
+//
+//
+function getBetas(){
+  return 0.9, 0.999;
+}
 
-//turn stop to true on click of "stop_button"
+//turn stop to true when "stop_button" is clicked
 $(function() {
   $('#stop_button').on('click', function(e) {
     stop = true;
@@ -41,30 +71,41 @@ $(function() {
     stop = true;
     var link = "/init_params";
     e.preventDefault();
+    it = 1;
 
     //Take parameters from basic settings
     if (advanced_settings == false){
       var optimisation_f = document.getElementById("optimisation_function").value;
-      var hidden_a = document.getElementById("hidden_activation").value;
-      var out_a = document.getElementById("out_activation").value;
+      var layer_activations = getLayerActivations();
       for (var i = 0; i < layers.length; i++){
         layers[i] = parseInt(document.getElementById("neuron_counter_" + (i + 1).toString()).value);
       }
       $.post(link, {
         optimisation_function: optimisation_f,
-        hidden_activation: hidden_a,
-        out_activation: out_a,
-        layer_neurons: JSON.stringify(layers) //Have to stringify list because cannot transfer array as a json.
+        layer_activations: JSON.stringify(layer_activations), //Have to stringify list because cannot transfer array as a json.
+        layer_neurons: JSON.stringify(layers) //Have to stringify list because cannot transfer array as a json. 
       });
     } else {
-
+          //What to return if advanced settings are on.
     }
-
-
-    return false;
   });
 });
 
+function getLayerActivations(){
+  if (advanced_settings == false){
+    var h_act = $("#hidden_activation").val();
+    var o_act = $("#out_activation").val();
+    var activations = []
+    for (var i = 0; i < layers.length; i++){
+      if (i + 1 !== layers.length){
+        activations.push(h_act);
+      } else {
+        activations.push(o_act); 
+      }
+    }
+    return activations;
+  }
+}
 
 //Enables toggling between basic and advanced settings UI. (Back end still needs work.)
 var advanced_settings = false;
@@ -122,7 +163,6 @@ function AddLayer(){
   newRemoveButton.onclick = "RemoveNeuron()";
   document.getElementById(divID).appendChild(newRemoveButton);
 
-  console.log(layers);
 }
 
 function RemoveLayer(){
@@ -135,10 +175,4 @@ function RemoveLayer(){
   }
 }
 
-
-$('#neuron_counter_1').on('input', function(e) {
-  console.log("A")
-  var layerid = e.target.id;
-  console.log(layerid);
-});
 
