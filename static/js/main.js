@@ -3,47 +3,46 @@ var stop = false;
 var it = 1; //Count total amount of iterations since reset
 //triggers the function linked to "/nn_iteration/<float:alpha>" when button "run_button" is pressed.
 $(function() {
-    $('#run_button').on('click', function(e) {
-      var link = "/nn_iteration/" + document.getElementById("alpha_input").value.toString();
-      var iterations = $("#iterations").val(); 
-      var run_it = 0; //count number of iterations in this run
-      stop = false;
-      e.preventDefault();
-      var beta1 = 0.9;
-      var beta2 = 0.999;
-      function nn_iteration(){
-        if (run_it < iterations && stop == false){
-          var alpha = $("#alpha_input").val().toString();
-
-          $.post("/nn_iteration",{
-            alpha: alpha,
-            iteration: it.toString(),
-            beta1: beta1.toString(),
-            beta2: beta2.toString()
-          }, function(data) {
-              it++;
-              run_it++;
-              nn_iteration();    //Loop structured as a callback so that the neural network iteration in the app.py file has the time to finish.
-              var cost = $.parseJSON(data); //retrieve json sent by the nn_iteration function in app.py
-              $("#cost").html(cost.toString());
-        });
-          
-          /*
-          $.getJSON(link,          //run nn_iteration function in app.py
-              function(data) {
-                it++;
-                nn_iteration();    //Loop structured as a callback so that the neural network iteration in the app.py file has the time to finish.
-                var cost = $.parseJSON(data); //retrieve json sent by the nn_iteration function in app.py
-                $("#cost").attr("innerHTML", cost.toString());
-          });*/
-        } else if(stop == true){
-          stop == false;
-        }
-      }      
-      nn_iteration();
-      return false;
-    });
+  $('#run_button').on('click', function(e) {
+    var link = "/nn_iteration";
+    var iterations = $("#iterations").val(); 
+    var run_it = 0; //count number of iterations in this run
+    stop = false;
+    e.preventDefault();
+    var beta1 = 0.9;
+    var beta2 = 0.999;
+    //this function performs a single iteration, it is recursive with a callback 
+    function nn_iteration(){
+      if (run_it < iterations && stop == false){
+        var alpha = $("#alpha_input").val().toString();
+         $.post(link,{
+          alpha: alpha,
+          iteration: it.toString(),
+          beta1: beta1.toString(),
+          beta2: beta2.toString()
+        }, function(data) {
+            it++;
+            run_it++;
+            nn_iteration();    //Loop structured as a callback so that the neural network iteration in the app.py file has the time to finish.
+            var cost = $.parseJSON(data); //retrieve json sent by the nn_iteration function in app.py
+            $("#cost").html(cost.toString());
+            if (run_it == iterations - 1){
+              var t1 = performance.now();
+              console.log(t1-t0);
+            }
+      });
+      } else if(stop == true){ //this is here to stop iterating as soon as stop becomes true, 
+        stop == false;
+      }
+    }      
+    var t0 = performance.now();
+    nn_iteration();
+    
+    
   });
+});
+
+
 //
 //
 //
@@ -75,10 +74,10 @@ $(function() {
 
     //Take parameters from basic settings
     if (advanced_settings == false){
-      var optimisation_f = document.getElementById("optimisation_function").value;
+      var optimisation_f = $("#optimisation_function").val();
       var layer_activations = getLayerActivations();
       for (var i = 0; i < layers.length; i++){
-        layers[i] = parseInt(document.getElementById("neuron_counter_" + (i + 1).toString()).value);
+        layers[i] = parseInt( $("#neuron_counter_" + (i + 1).toString() ).val() );
       }
       $.post(link, {
         optimisation_function: optimisation_f,
@@ -91,6 +90,8 @@ $(function() {
   });
 });
 
+
+//Creates a list with activation functions for each layer
 function getLayerActivations(){
   if (advanced_settings == false){
     var h_act = $("#hidden_activation").val();
@@ -175,4 +176,88 @@ function RemoveLayer(){
   }
 }
 
+
+$(function(){
+    $("#data_set_import").change(function(){
+      var file_name = $("#data_set_import").val();
+      var data = new FormData($("#import_form")[0]);
+
+      if (file_name !== ""){ //This verification is done to make sure the user choses a file
+        $(".feature_count_class").css("display", "inline-block");
+        $.ajax({
+          type: "POST",
+          url:"/get_dims",
+          enctype: "multipart/form-data", //This encryption is required to send files
+          data: data,
+          cache: false,
+          processData: false,
+          contentType: false,
+
+          //function to run on success of post
+          success: function(data){
+
+            var dimentions = $.parseJSON(data); //request json
+            var size_x = dimentions["size_x"]; //get X dims
+            var size_y = dimentions["size_y"];
+
+            if (size_y < size_x){
+              var temp = size_y;
+              size_y = size_x;
+              size_x = temp;
+            }
+            
+            $("#choice1").remove();
+            $("#choice2").remove();
+
+            var choice1 = document.createElement("option");
+            choice1.value = size_x.toString();
+            choice1.id = "choice1";
+            choice1.innerHTML = size_x.toString();
+            $("#feature_count_selection").append(choice1);
+
+            var choice2 = document.createElement("option");
+            choice2.value = size_y.toString();
+            choice2.id = "choice2";
+            choice2.innerHTML = size_y.toString();
+            $("#feature_count_selection").append(choice2);
+          } 
+        });
+      } else {
+        $(".feature_count_class").css("display", "none");
+      }
+    });
+});
+
+$(function(){
+  $("#data_set_import_y").change(function(){
+    var file_name = $("#data_set_import_y").val();
+    var data = new FormData($("#import_y_form")[0]);
+
+    if (file_name !== ""){ //This verification is done to make sure the user choses a file
+      $.ajax({
+        type: "POST",
+        url:"/checkYDataset",
+        enctype: "multipart/form-data", //This encryption is required to send files
+        data: data,
+        cache: false,
+        processData: false,
+        contentType: false,
+
+        //function to run on success of post
+        success: function(data){
+
+          var isSuccess = $.parseJSON(data); //request json
+          if (isSuccess == "0"){
+            $("#correct_data_shape").html("These datasets are not compatible.");
+            return "None";
+          } else {
+            $("#correct_data_shape").html("These datasets are compatible.");
+          }
+
+          
+        } 
+      });
+    }
+  });
+});
 

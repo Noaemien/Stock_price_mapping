@@ -1,6 +1,8 @@
 import numpy as np
 from flask import Flask, render_template, jsonify, request, json
 from nn_module import Neural_Network
+from io import BytesIO
+import pandas as pd
 app = Flask(__name__)
 
 
@@ -8,7 +10,7 @@ app = Flask(__name__)
 def nn_training():
     return render_template("nn_training.html")
 
-X = np.random.uniform(-1, 5, (1, 5000))
+X = np.random.uniform(-1, 5, (1, 8670))
 Y = X ** 2
 
 nn = Neural_Network(X, Y, [128,  1], optimisation_function="GRADIENTDESCENT")
@@ -41,6 +43,45 @@ def init_params():
     nn = Neural_Network(X, Y, layer_neurons=layer_n, optimisation_function=optimisation_f, layer_activations= activation_f)
     print(optimisation_f, activation_f, layer_n)
     return "None"
+
+@app.route("/get_dims", methods=["POST"])
+def getDatasetDims():
+    global X
+    file_n = request.files["file"]
+    file_r = file_n.stream.read()
+    df_file = pd.read_csv(BytesIO(file_r))
+    X = df_file.to_numpy()
+
+    if len(X) != min(len(X), len(X[0])):
+        X = X.T
+
+    X = np.delete(X, 0, axis = 0)
+    print(X)
+    data = {
+        "size_x": len(df_file),
+        "size_y": len(df_file.columns)
+    }
+    return json.dumps(data)
+
+@app.route("/checkYDataset", methods=["POST"])
+def checkYDataset():
+    global Y, X
+    file_n = request.files["file"]
+    file_r = file_n.stream.read()
+    df_file = pd.read_csv(BytesIO(file_r))
+    Y = df_file.to_numpy()
+
+    if len(Y) == len(X[0]):
+        Y = Y.T
+    elif len(Y[0]) == len(X[0]):
+        pass
+    else:
+        return json.dumps("0")
+    
+    print(Y)
+
+    return "1"
+
 
 
 if __name__ == "__main__":

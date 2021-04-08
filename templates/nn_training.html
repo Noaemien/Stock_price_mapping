@@ -7,7 +7,20 @@
     <body>
         <h1>Welcome to the neural network training grounds!</h1>
         <h2>Made by Noa Ette.</h2>
-        <h2><a href="https://i.kym-cdn.com/entries/icons/facebook/000/035/644/juancover.jpg">#BLACKLIVESMATTER. </a> </h2>
+        <div id="data_prep">
+            <form enctype="multipart/form-data" id="import_form">
+                <label for="data_set_import">Import dataset X: </label>
+                <input type="file" name="file" accept=".csv" id="data_set_import" value="import dataset"/>
+            </form>
+            <label for="feature_count_selection" class="feature_count_class" style="display: none;">Feature count: </label>
+            <select name="feature_count" id="feature_count_selection" class="feature_count_class" style="display: none;">
+            </select>
+            <form enctype="multipart/form-data" id="import_y_form">
+                <label for="data_set_import_y">Import dataset Y: </label>
+                <input type="file" name="file" accept=".csv" id="data_set_import_y" value="import dataset"/>
+            </form>
+            <span id="correct_data_shape"></span>
+        </div>
 
         <input type="button" id="init_params" value="re-initialise" />
         <input type="button" id="run_button" value="run" />
@@ -29,8 +42,8 @@
                 <!-- Optimisation function drop down menu -->
                 <label for="optimisation_function">Optimisation function: </label>
                 <select name="optimisation_function" id="optimisation_function">
-                    <option value="adam">Adam</option>        
                     <option value="gradientdescent">Gradient descent</option>
+                    <option value="adam">Adam</option>  
                 </select>
 
                 <!-- Hidden layer activation functions drop down menu -->
