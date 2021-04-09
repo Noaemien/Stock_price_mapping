@@ -67,6 +67,10 @@ class Neural_Network:
             return np.maximum(0, Z)
         elif self.params["Act" + layer] == "LINEAR":
             return Z
+        elif self.params["Act" + layer] == "TANH":
+            return (np.exp(Z) - np.exp(-Z))/(np.exp(Z) + np.exp(-Z))
+        elif self.params["Act" + layer] == "SIGMOID":
+            return 1 / ( 1 + np.exp(-Z))
         return 1
     #
     # TO DO
@@ -78,6 +82,10 @@ class Neural_Network:
             out = A * drelu 
         elif layer_act == "LINEAR":
             return A
+        elif layer_act == "TANH":
+            return 1 - A **2
+        elif layer_act == "SIGMOID":
+            return A * (1 - A)
 
         return out
     
