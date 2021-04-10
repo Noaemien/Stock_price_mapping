@@ -116,6 +116,8 @@ class Neural_Network:
             if layer == "1":
                 self.forward_cache["Z1"] = self.params["W1"].dot(self.X) + self.params["b1"] #Forward pass with 1st layer: W1 * X + b
                 self.forward_cache["A1"] = self.activation(self.forward_cache["Z1"], layer) #Activation function
+                if int(layer) == self.layer_nbr:
+                    self.preds = self.forward_cache["A1"]
                 continue
             #Forward pass with n_st layer: Z_n = W_n * A_n-1 + b_n
             self.forward_cache["Z" + layer] = self.params["W" + layer].dot(self.forward_cache["A" + str(i)]) + self.params["b" + layer] 
@@ -124,7 +126,7 @@ class Neural_Network:
             if int(layer) == self.layer_nbr:
                 self.preds = self.forward_cache["A" + layer] 
     #
-    # WORKING
+    # WORKING BUT NEED TO IMPLEMENT FUNCTIONALITY FOR IF NN IS ONE LAYER LONG
     #       
     def backward(self):
         m = len(self.Y[0])

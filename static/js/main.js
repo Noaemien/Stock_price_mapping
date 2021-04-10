@@ -82,10 +82,15 @@ $(function() {
       for (var i = 0; i < layers.length; i++){
         layers[i] = parseInt( $("#neuron_counter_" + (i + 1).toString() ).val() );
       }
+
+      var post_layers = [].concat(layers);
+      post_layers.push(outNeurons);
+
+      console.log(post_layers, layers)
       $.post(link, {
         optimisation_function: optimisation_f,
         layer_activations: JSON.stringify(layer_activations), //Have to stringify list because cannot transfer array as a json.
-        layer_neurons: JSON.stringify(layers) //Have to stringify list because cannot transfer array as a json. 
+        layer_neurons: JSON.stringify(post_layers) //Have to stringify list because cannot transfer array as a json. 
       });
     } else {
           //What to return if advanced settings are on.
@@ -100,8 +105,8 @@ function getLayerActivations(){
     var h_act = $("#hidden_activation").val();
     var o_act = $("#out_activation").val();
     var activations = []
-    for (var i = 0; i < layers.length; i++){
-      if (i + 1 !== layers.length){
+    for (var i = 0; i < layers.length + 1; i++){  //plus one because of output kayer
+      if (i + 1 !== layers.length + 1){ //same reason here
         activations.push(h_act);
       } else {
         activations.push(o_act); 
@@ -149,11 +154,11 @@ function AddLayer(){
 
   var neuronInput = document.createElement("INPUT");
   neuronInput.type = "number";
-  if (layers.length == 1){ //If there are no layers, create a new layer with 8 neurons
+  if (layers.length == 0){ //If there are no layers, create a new layer with 8 neurons
     neuronInput.value = 8; 
     layers.push(8);
   } else { //If there is at least one layer, create a new layer with the amount of neurons on the previous one.
-    var prevLayerNeurons = parseInt(document.getElementById("neuron_counter_" + layernbr).value)
+    var prevLayerNeurons = layers[layers.length - 1]
     neuronInput.value = prevLayerNeurons;
     layers.push(prevLayerNeurons); 
   }
@@ -231,6 +236,8 @@ $(function(){
     });
 });
 
+var outNeurons = 0;
+
 $(function(){
   $("#data_set_import_y").change(function(){
     var file_name = $("#data_set_import_y").val();
@@ -277,7 +284,7 @@ $(function(){
               var lastNeuronInput = document.createElement("INPUT");  
               lastNeuronInput.type = "number";
               lastNeuronInput.value = outputsRequired; //to get the correct number of neurons
-              layers.push(outputsRequired); 
+              outNeurons = outputsRequired; 
               lastNeuronInput.id = "last_neuron";
               lastNeuronInput.className = "layer";
               lastNeuronInput.readOnly = true;
