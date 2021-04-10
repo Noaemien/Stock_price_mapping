@@ -76,11 +76,18 @@ def checkYDataset():
     elif len(Y[0]) == len(X[0]):
         pass
     else:
-        return json.dumps("0")
+        return json.dumps({
+            "isSuccess": "0",  #Send that the datasets are incompatible
+            "size_y": 0
+        })
+         
     
     print(Y)
 
-    return "1"
+    return json.dumps({
+            "isSuccess": "1",  #Send that the datasets are compatible
+            "size_y": len(Y)
+        })
 
 
 

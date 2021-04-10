@@ -23,8 +23,8 @@
         </div>
 
         <input type="button" id="init_params" value="re-initialise" />
-        <input type="button" id="run_button" value="run" />
-        <input type="button" id="stop_button" value="stop" />
+        <input type="button" id="run_button" value="run" disabled/>
+        <input type="button" id="stop_button" value="stop" disabled/>
         
         <label for="iterations">Number of iterations: </label>
         <input type="number" id="iterations" min="0" value="10" />
@@ -68,15 +68,17 @@
             </div>
 
             <div>
-                <input type="button" id="add_layer_button" value="Add layer" onclick="AddLayer()" />
+                <input type="button" id="add_layer_button" value="Add layer" onclick="AddLayer()" disabled/>
 
                 <label for="layer_nbr">Number of layers: </label>
-                <input type="number" id="layer_nbr" value="0"/>
+                <input type="number" id="layer_nbr" value="0" readonly/>
 
-                <input type="button" id="del_layer_button" value="Remove layer" onclick="RemoveLayer()" />
+                <input type="button" id="del_layer_button" value="Remove layer" onclick="RemoveLayer()" disabled/>
             </div>
             <div id="layers">
-
+                <div id="hidden_layers">
+                    
+                </div>
                 
             </div>
 
