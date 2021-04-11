@@ -92,13 +92,13 @@ class Neural_Network:
     def get_cost(self):
         m = len(self.Y[0])
         if self.cost_function == "MSE":
-            return (1/m) * np.sum((self.preds - self.Y) ** 2)
+            return (1/m) * 0.5 * np.sum((self.preds - self.Y) ** 2) #see references for why i multiply by 0.5
     #
     # TO DO
     #
     def get_d_cost(self):
         if self.cost_function == "MSE":
-            return 2 * (self.preds - self.Y)
+            return (self.preds - self.Y)
 
         elif self.cost_function == "LOG":
             pass
