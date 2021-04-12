@@ -83,7 +83,7 @@ class Neural_Network:
         elif layer_act == "LINEAR":
             return A
         elif layer_act == "TANH":
-            return 1 - A **2
+            return 1 - self.forward_cache["Z" + layer] **2
         elif layer_act == "SIGMOID":
             return A * (1 - A)
 
@@ -206,6 +206,7 @@ class Neural_Network:
         self.forward()
         self.backward()
         self.optimisation(alpha, beta1, beta2, it)
+        print(self.preds[0][:5], self.Y[0][:5])
         return self.get_cost()
         
                 
