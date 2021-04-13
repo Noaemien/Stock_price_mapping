@@ -93,6 +93,9 @@ class Neural_Network:
         m = len(self.Y[0])
         if self.cost_function == "MSE":
             return (1/m) * 0.5 * np.sum((self.preds - self.Y) ** 2) #see references for why i multiply by 0.5
+        elif self.cost_function == "CROSSENTROPYCOST":
+            print(self.preds)
+            return (1/m) * np.sum(-(self.Y * np.log(self.preds + 1e-8) + (1 - self.Y) * np.log(1 - self.preds + 1e-8)))
     #
     # TO DO
     #
@@ -100,9 +103,12 @@ class Neural_Network:
         if self.cost_function == "MSE":
             return (self.preds - self.Y)
 
-        elif self.cost_function == "LOG":
-            pass
-        return self.Y
+        elif self.cost_function == "CROSSENTROPYCOST":
+            print("Works")
+            return (self.preds - self.Y) / ((1 - self.preds) * self.preds)
+        
+        
+        return "a"
     
     
     #

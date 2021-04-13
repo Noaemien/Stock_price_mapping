@@ -41,7 +41,7 @@ print("number of training examples: ", len(mini_batches) * len(mini_batches[0]))
 
 mini_batches_y = []
 for i in whitelist:
-    df_temp = df[[i + " Close"]].loc[df.index > pd.to_datetime("01/01/" + str(start_y))]
+    df_temp = df[[i + " Close"]].pct_change().loc[df.index > pd.to_datetime("01/01/" + str(start_y))]
     df_temp = df_temp.iloc[1:]
     mini_batches_y.append(df_temp)
 
@@ -51,12 +51,14 @@ for i in whitelist:
 for i in range(len(mini_batches)):
     index = whitelist[i] + " Close" 
     df_temp = mini_batches[i]
-    df_temp.iloc[:, 1] = df_temp.iloc[:, 1] / 100000000
+    df_temp.iloc[:, 1] = df_temp.iloc[:, 1].pct_change()
+    df_temp.iloc[:, 0] = df_temp.iloc[:, 0].pct_change()
     df_temp["EMA 12"] = ta.ema(df_temp.loc[: , index], length = 12) #Calculate 12 day exponential moving average, No need for adjust as we will remove first year
     df_temp["EMA 26"] = ta.ema(df_temp.loc[: , index], length = 26) #Calculate 26 day exponential moving average
     df_temp["MACD"] = mini_batches[i]["EMA 12"] - mini_batches[i]["EMA 26"] #Calculate MACD with 12 and 26 EMA
     df_temp["RSI"] = ta.rsi(df_temp.loc[: , index], length = 14, scalar = 1) #Calculate RSI with a length of 14 days
     df_temp["VWMA"] = ta.vwma(df_temp.loc[:, index], df_temp.loc[:, whitelist[i] + " Volume"], length = 20)
+
     df_temp = df_temp.loc[ df_temp.index > pd.to_datetime("01/01/" + str(start_y))] #Remove first year data
     df_temp = df_temp.iloc[:-1]
     mini_batches[i] = df_temp

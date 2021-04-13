@@ -37,11 +37,12 @@ def init_params():
     
     #Get data from post in "main.js"
     optimisation_f = request.form["optimisation_function"].upper()
+    cost_f = request.form["cost_function"].upper()
     activation_f = json.loads(request.form["layer_activations"])
     layer_n = json.loads(request.form["layer_neurons"])
 
-    nn = Neural_Network(X, Y, layer_neurons=layer_n, optimisation_function=optimisation_f, layer_activations= activation_f)
-    print(optimisation_f, activation_f, layer_n)
+    nn = Neural_Network(X, Y, layer_neurons=layer_n, optimisation_function=optimisation_f, layer_activations= activation_f, cost_function=cost_f)
+    print(optimisation_f, cost_f, activation_f, layer_n)
     return "None"
 
 @app.route("/get_dims", methods=["POST"])
@@ -55,8 +56,12 @@ def getDatasetDims():
     if len(X) != min(len(X), len(X[0])):
         X = X.T
 
+    #
+    # NEED TO ADD DATASET FORM DETECTION ( REMOVE INDEX LAYER IF IT EXISTS AND REMOVE LAYERS WITH NAN VALUES )
+    #
+
     X = np.delete(X, 0, axis = 0)
-    print(X)
+
     data = {
         "size_x": len(df_file),
         "size_y": len(df_file.columns)
