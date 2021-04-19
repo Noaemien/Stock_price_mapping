@@ -1,6 +1,7 @@
 import numpy as np
 from flask import Flask, render_template, jsonify, request, json
 from nn_module import Neural_Network
+import os
 from io import BytesIO
 import pandas as pd
 app = Flask(__name__)
@@ -48,17 +49,19 @@ def init_params():
 @app.route("/get_dims", methods=["POST"])
 def getDatasetDims():
     global X
-    file_n = request.files["file"]
-    file_r = file_n.stream.read()
-    df_file = pd.read_csv(BytesIO(file_r))
-    X = df_file.to_numpy()
+    file_imported = request.files["file"]
+    file_type = file_imported.content_type #get file type from filestorage.
+    
+    #
+    print(file_type)
+    if file_type == "text/csv":
+        df_file = pd.read_csv(BytesIO(file_imported.stream.read())).dropna(axis = 0, ) #Converts imported file to pandas dataframe and removes rows with na values
+        X = df_file.to_numpy() #convert to numpy array
 
-    if len(X) != min(len(X), len(X[0])):
+
+    if len(X) != min(len(X), len(X[0])):  #Set feature count to smallest dimention (I believe its often most likely that the smallest dim is the feature count)
         X = X.T
 
-    #
-    # NEED TO ADD DATASET FORM DETECTION ( REMOVE INDEX LAYER IF IT EXISTS AND REMOVE LAYERS WITH NAN VALUES )
-    #
 
     X = np.delete(X, 0, axis = 0)
 
@@ -67,6 +70,14 @@ def getDatasetDims():
         "size_y": len(df_file.columns)
     }
     return json.dumps(data)
+
+@app.route("/set_test_dataset", methods=["POST"])
+def setTestDataset():
+    #
+    #Get test datasets
+    #
+    
+    return "None"
 
 @app.route("/checkYDataset", methods=["POST"])
 def checkYDataset():
