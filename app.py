@@ -11,7 +11,7 @@ app = Flask(__name__)
 def nn_training():
     return render_template("nn_training.html")
 
-X = np.random.uniform(-1, 5, (1, 8670))
+X = np.random.uniform(-1, 5, (1, 50)) #just a starter dataset, not important.
 Y = X ** 2
 
 nn = Neural_Network(X, Y, [128,  1], optimisation_function="GRADIENTDESCENT")
@@ -63,13 +63,23 @@ def getDatasetDims():
         X = X.T
 
 
-    X = np.delete(X, 0, axis = 0)
+    #X = np.delete(X, 0, axis = 0)
 
     data = {
         "size_x": len(df_file),
         "size_y": len(df_file.columns)
     }
     return json.dumps(data)
+
+@app.route("/tranposeX", methods = ["POST"])
+def transposeX():
+    global X, Y 
+    X = X.T
+    
+    if len(Y[0]) != len(X[0]):
+        Y = Y.T
+
+    return "None"
 
 @app.route("/set_test_dataset", methods=["POST"])
 def setTestDataset():
@@ -96,9 +106,7 @@ def checkYDataset():
             "isSuccess": "0",  #Send that the datasets are incompatible
             "size_y": 0
         })
-         
-    
-    print(Y)
+
 
     return json.dumps({
             "isSuccess": "1",  #Send that the datasets are compatible
