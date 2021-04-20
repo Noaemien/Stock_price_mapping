@@ -213,7 +213,7 @@ class Neural_Network:
         self.backward()
         self.optimisation(alpha, beta1, beta2, it)
         print(self.preds[0][:5], self.Y[0][:5])
-        return self.get_cost()
+        return self.get_cost(), self.preds
         
                 
                 
