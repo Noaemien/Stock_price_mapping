@@ -8,6 +8,12 @@
         <h1>Welcome to the neural network training grounds!</h1>
         <h2>Made by Noa Ette.</h2>
         <div id="data_prep">
+            <label for="select_test_datasets">Select example datasets (optional)</label>
+            <select name="test_datasets" id="select_test_dataset" >
+                <option value="NONE">None</option>
+                <option value="MNIST_NUMBER">MNIST number classification</option>
+                <option value="MNIST_FASHION">MNIST fashion classification</option>
+            </select>
             <form enctype="multipart/form-data" id="import_form">
                 <label for="data_set_import">Import dataset X: </label>
                 <input type="file" name="file" accept=".csv" id="data_set_import" value="import dataset"/>
@@ -53,7 +59,6 @@
                     <option value="relu">ReLU</option>
                     <option value="tanh">Tanh</option>
                     <option value="sigmoid">Sigmoid</option>
-                    <option value="softmax">Softmax</option>
                 </select>
 
                 <!-- Output layer activation functions drop down menu -->
@@ -65,6 +70,14 @@
                     <option value="sigmoid">Sigmoid</option>
                     <option value="softmax">Softmax</option>
                 </select>
+
+                <label for="cost_function">Output layer activation function: </label>
+                <select name="cost_function" id="cost_function">
+                    <option value="MSE">Mean squared error</option>        
+                    <option value="CROSSENTROPYCOST">Cross entropy cost</option>
+                </select>
+
+
             </div>
 
             <div>
@@ -86,6 +99,10 @@
         <div id="py_console">
             <label for="cost">Cost: </label>
             <span id="cost">0</span>
+
+            <br>
+            <input type="button" id="graph_results" value="Graph results" />
+            <img src="" id="results_graph" alt="graph">
         </div>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>

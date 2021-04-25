@@ -79,6 +79,7 @@ $(function() {
     if (advanced_settings == false){
       var optimisation_f = $("#optimisation_function").val();
       var layer_activations = getLayerActivations();
+      var cost_f = $("#cost_function").val();
       for (var i = 0; i < layers.length; i++){
         layers[i] = parseInt( $("#neuron_counter_" + (i + 1).toString() ).val() );
       }
@@ -90,7 +91,8 @@ $(function() {
       $.post(link, {
         optimisation_function: optimisation_f,
         layer_activations: JSON.stringify(layer_activations), //Have to stringify list because cannot transfer array as a json.
-        layer_neurons: JSON.stringify(post_layers) //Have to stringify list because cannot transfer array as a json. 
+        layer_neurons: JSON.stringify(post_layers), //Have to stringify list because cannot transfer array as a json. 
+        cost_function: cost_f
       });
     } else {
           //What to return if advanced settings are on.
@@ -141,12 +143,6 @@ function AddLayer(){
   newDiv.id = divID;
   document.getElementById("hidden_layers").appendChild(newDiv);
 
-  //Generate button to add neuron to layer
-  var newAddButton = document.createElement("BUTTON");
-  newAddButton.innerHTML = "Add neuron";
-  newAddButton.onclick = "AddNeuron()";
-  document.getElementById(divID).appendChild(newAddButton);
-
   var neuronInput_label = document.createElement("LABEL");
   neuronInput_label.htmlFor = "neuron_counter_" + newLayernbr.toString();
   neuronInput_label.innerHTML = "Number of neurons: "
@@ -158,19 +154,13 @@ function AddLayer(){
     neuronInput.value = 8; 
     layers.push(8);
   } else { //If there is at least one layer, create a new layer with the amount of neurons on the previous one.
-    var prevLayerNeurons = layers[layers.length - 1]
+    var prevLayerNeurons = parseInt($("#neuron_counter_" + (newLayernbr - 1).toString()).val());
     neuronInput.value = prevLayerNeurons;
     layers.push(prevLayerNeurons); 
   }
   neuronInput.id = "neuron_counter_" + newLayernbr.toString();
   neuronInput.className = "layer";
   document.getElementById(divID).appendChild(neuronInput);
-
-
-  var newRemoveButton = document.createElement("BUTTON");
-  newRemoveButton.innerHTML = "Remove neuron";
-  newRemoveButton.onclick = "RemoveNeuron()";
-  document.getElementById(divID).appendChild(newRemoveButton);
 
 }
 
@@ -228,6 +218,13 @@ $(function(){
             choice2.id = "choice2";
             choice2.innerHTML = size_y.toString();
             $("#feature_count_selection").append(choice2);
+            //
+            //
+            //
+            // Need to add transposition of dataset on change of choice
+            //
+            //
+
           } 
         });
       } else {
@@ -235,6 +232,39 @@ $(function(){
       }
     });
 });
+
+$(function(){
+  $("#select_test_dataset").change(function(){
+    var choice = $("#select_test_dataset").val();
+    if (choice !== "NONE"){
+      $.post("/set_test_dataset", {
+        data: choice
+      });
+    }
+  });
+});
+
+$(function(){
+  $("#feature_count_selection").change(function(){
+      $.post("/tranposeX", {
+        data: "None"
+      });
+  });
+});
+
+$(function(){
+  $("#graph_results").on("click", function(){
+      $.post("/graph_results", {
+        data: "None"
+      }, function(data){
+        var im = data;
+        var r = new FileReader();
+
+        $('#results_graph').attr('src', r.readAsDataURL(im));
+      });
+  });
+});
+
 
 var outNeurons = 0;
 
@@ -278,7 +308,10 @@ $(function(){
               layers[layers.length - 1] = outputsRequired;
             } else { //if last_neuron doesnt exist, create it with the correct number of neurons
 
-
+              var lastNeuronInput_label = document.createElement("LABEL");
+              lastNeuronInput_label.htmlFor = "last_neuron";
+              lastNeuronInput_label.innerHTML = "Ouput neurons: "
+              document.getElementById("layers").appendChild(lastNeuronInput_label);
 
 
               var lastNeuronInput = document.createElement("INPUT");  
